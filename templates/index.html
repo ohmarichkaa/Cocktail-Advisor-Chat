@@ -108,7 +108,6 @@
         const userInput = document.getElementById('user_input');
         const sendBtn = document.getElementById('send-btn');
 
-        // Функція для додавання повідомлення в чат
         function addMessage(message, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
@@ -117,16 +116,13 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Обробник кнопки відправлення
         sendBtn.addEventListener('click', async () => {
             const message = userInput.value.trim();
             if (!message) return;
 
-            // Додаємо повідомлення користувача
             addMessage(message, 'user');
             userInput.value = '';
-
-            // Відправка запиту на сервер
+            
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
@@ -135,7 +131,6 @@
                 });
                 const data = await response.json();
 
-                // Додаємо повідомлення бота
                 addMessage(data.response, 'bot');
             } catch (error) {
                 addMessage('An error occurred while requesting the server!', 'bot');
@@ -143,7 +138,6 @@
             }
         });
 
-        // Відправка повідомлення при натисканні Enter
         userInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();

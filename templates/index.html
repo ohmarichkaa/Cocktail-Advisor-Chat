@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cocktail Advisor Chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #6a1b9a;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        #chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            border: 2px solid #6a1b9a;
+            border-radius: 10px;
+            margin: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+
+        .user-message {
+            background-color: #d1c4e9;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background-color: #b39ddb;
+            align-self: flex-start;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 20px;
+            gap: 10px;
+            background-color: #6a1b9a;
+            flex-shrink: 0;
+        }
+
+        #user_input {
+            flex-grow: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            resize: none;
+        }
+
+        #send-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background-color: #f48fb1;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #send-btn:hover {
+            background-color: #ec407a;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍸 Cocktail Advisor Chat</h1>
+
+    <div id="chat-container"></div>
+
+    <div id="input-container">
+        <textarea id="user_input" placeholder="Write your question..."></textarea>
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user_input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Функція для додавання повідомлення в чат
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Обробник кнопки відправлення
+        sendBtn.addEventListener('click', async () => {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Додаємо повідомлення користувача
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            // Відправка запиту на сервер
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_input: message })
+                });
+                const data = await response.json();
+
+                // Додаємо повідомлення бота
+                addMessage(data.response, 'bot');
+            } catch (error) {
+                addMessage('An error occurred while requesting the server!', 'bot');
+                console.error(error);
+            }
+        });
+
+        // Відправка повідомлення при натисканні Enter
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendBtn.click();
+            }
+        });
+    </script>
+
+</body>
+</html>
